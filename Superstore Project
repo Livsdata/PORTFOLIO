@@ -1,0 +1,11 @@
+SELECT * 
+FROM superstore 
+ORDER BY price; 
+SELECT SUM * 
+FROM superstore; 
+SELECT Kitchen_Supplies 
+FROM superstore 
+ORDER BY price;
+SELECT SUM (stock_quantity), item_name
+FROM superstore
+GROUP BY item_name;
