@@ -1,0 +1,25 @@
+-- Create Employees Table
+CREATE TABLE Employees (
+    employee_id INTEGER PRIMARY KEY,
+    gender TEXT,
+    age INTEGER,
+    department TEXT,
+    job_role TEXT,
+    years_at_company INTEGER,
+    salary DECIMAL(10, 2),
+    performance_rating INTEGER, -- 1=Low, 2=Medium, 3=High
+    attrition BOOLEAN -- TRUE if employee left, FALSE otherwise
+);
+
+-- Insert Sample Data
+INSERT INTO Employees (employee_id, gender, age, department, job_role, years_at_company, salary, performance_rating, attrition) VALUES
+(1, 'Male', 30, 'Sales', 'Sales Representative', 5, 60000.00, 2, FALSE),
+(2, 'Female', 25, 'HR', 'HR Partner', 2, 45000.00, 1, TRUE),
+(3, 'Male', 40, 'IT', 'Software Engineer', 10, 90000.00, 3, FALSE),
+(4, 'Female', 28, 'Sales', 'Sales Representative', 3, 55000.00, 2, TRUE),
+(5, 'Male', 35, 'IT', 'DevOps Engineer', 7, 85000.00, 3, FALSE),
+(6, 'Female', 22, 'Marketing', 'Marketing Specialist', 1, 40000.00, 1, TRUE),
+(7, 'Male', 45, 'HR', 'HR Manager', 15, 100000.00, 3, FALSE),
+(8, 'Female', 33, 'Sales', 'Sales Manager', 8, 75000.00, 2, FALSE),
+(9, 'Male', 29, 'IT', 'Data Analyst', 4, 70000.00, 2, TRUE),
+(10, 'Female', 38, 'Marketing', 'Marketing Manager', 12, 95000.00, 3, FALSE);
