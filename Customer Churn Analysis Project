@@ -1,0 +1,66 @@
+-- 1. Churn Rate (overall)
+-- For accurate churn rate, you'd typically define a cohort (e.g., customers who started in Q1)
+-- and see how many churned within a certain period. This is a simpler overall rate.
+SELECT
+    CAST(SUM(CASE WHEN status = 'Cancelled' THEN 1 ELSE 0 END) AS REAL) * 100.0 / COUNT(*) AS churn_rate_percent
+FROM Subscriptions;
+
+-- 2. Average Subscription Duration for Churned vs. Active Customers
+SELECT
+    status,
+    AVG(
+        CASE
+            WHEN status = 'Cancelled' THEN julianday(end_date) - julianday(start_date) -- SQLite date difference in days
+            ELSE julianday('now') - julianday(start_date) -- For active, calculate days until today
+        END
+    ) AS average_subscription_duration_days
+FROM Subscriptions
+GROUP BY status;
+
+-- 3. Churn Rate by Plan Type
+SELECT
+    plan_type,
+    COUNT(*) AS total_subscriptions,
+    SUM(CASE WHEN status = 'Cancelled' THEN 1 ELSE 0 END) AS churned_subscriptions,
+    CAST(SUM(CASE WHEN status = 'Cancelled' THEN 1 ELSE 0 END) AS REAL) * 100.0 / COUNT(*) AS churn_rate_percent
+FROM Subscriptions
+GROUP BY plan_type
+ORDER BY churn_rate_percent DESC;
+
+-- 4. Average Monthly Usage (minutes watched) for Churned Customers Prior to Cancellation
+-- This query is more complex and involves joining and calculating usage before the `end_date`.
+-- We'll look at the average usage in the month prior to cancellation.
+
+WITH ChurnedCustomersUsage AS (
+    SELECT
+        s.customer_id,
+        s.end_date AS cancellation_date,
+        ul.log_date,
+        ul.minutes_watched
+    FROM Subscriptions s
+    JOIN Usage_Logs ul ON s.customer_id = ul.customer_id
+    WHERE s.status = 'Cancelled'
+      AND ul.log_date BETWEEN date(s.end_date, '-1 month') AND s.end_date -- Usage in the month before cancellation
+)
+SELECT
+    ccu.customer_id,
+    AVG(ccu.minutes_watched) AS avg_minutes_watched_prior_churn
+FROM ChurnedCustomersUsage ccu
+GROUP BY ccu.customer_id
+ORDER BY avg_minutes_watched_prior_churn ASC;
+
+-- To get the overall average usage for *all* churned customers in that period:
+WITH ChurnedCustomersUsage AS (
+    SELECT
+        s.customer_id,
+        s.end_date AS cancellation_date,
+        ul.log_date,
+        ul.minutes_watched
+    FROM Subscriptions s
+    JOIN Usage_Logs ul ON s.customer_id = ul.customer_id
+    WHERE s.status = 'Cancelled'
+      AND ul.log_date BETWEEN date(s.end_date, '-1 month') AND s.end_date
+)
+SELECT
+    AVG(minutes_watched) AS overall_avg_minutes_watched_prior_churn
+FROM ChurnedCustomersUsage;
